@@ -17,6 +17,7 @@ export default withAuth(
   },
   {
     callbacks: { authorized: ({ token }) => !!token },
+    pages: { signIn: '/login' }, // <--- INI KUNCINYA: Memaksa kembali ke /login buatan kita
   }
 );
 
