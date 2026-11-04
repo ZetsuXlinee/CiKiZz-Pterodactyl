@@ -30,7 +30,6 @@ export const tripay = {
       throw new Error(result.message || 'Gagal membuat transaksi Tripay');
     }
     
-    // Mengembalikan data agar sesuai dengan yang diharapkan oleh route.ts
     return result.data;
   }
 };
