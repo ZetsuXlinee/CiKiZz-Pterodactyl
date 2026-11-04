@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  EXPIRED
+  FAILED
+  PROVISIONING
+  COMPLETED
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String
+  passwordHash  String
+  role          Role     @default(USER)
+  pteroUserId   Int?     @unique    // ID user di panel Pterodactyl
+  createdAt     DateTime @default(now())
+
+  orders        Order[]
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  merchantRef   String      @unique
+  tripayRef     String?
+  userId        String?     // null jika guest checkout
+  planId        String
+  customerName  String
+  customerEmail String
+  customerPhone String
+  amount        Int
+  status        OrderStatus @default(PENDING)
+  checkoutUrl   String?
+  errorMessage  String?
+  processedAt   DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  user          User?       @relation(fields: [userId], references: [id])
+  server        Server?
+
+  @@index([customerEmail])
+  @@index([status])
+}
+
+model Server {
+  id            String   @id @default(cuid())
+  orderId       String   @unique
+  pteroServerId Int      @unique
+  pteroIdentifier String @unique
+  name          String
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())
+
+  order         Order    @relation(fields: [orderId], references: [id])
+}
