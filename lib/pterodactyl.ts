@@ -1,3 +1,4 @@
+// @ts-ignore
 import { Application, Setup } from 'pterodactyl-api-wrapper';
 import { randomBytes } from 'crypto';
 import { Plan } from './plans';
@@ -25,8 +26,8 @@ export async function provisionAccount(params: {
     name: `bot-${username}`,
     user: user.id,
     nest: Number(process.env.PTERO_NEST_ID || 1),
-    egg: Number(process.env.PTERO_EGG_ID || 1),
-    docker_image: process.env.PTERO_DOCKER_IMAGE || 'ghcr.io/parkervcp/yolks:nodejs_18',
+    egg: Number(process.env.PTERO_EGG_ID || 15), 
+    docker_image: process.env.PTERO_DOCKER_IMAGE || 'ghcr.io/parkervcp/yolks:nodejs_20',
     startup: process.env.PTERO_STARTUP || 'npm start',
     environment: { MAIN_FILE: 'index.js' },
     limits: {
