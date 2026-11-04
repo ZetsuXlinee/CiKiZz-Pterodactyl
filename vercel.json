@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "app/api/webhook/tripay/route.ts":    { "maxDuration": 60 },
+    "app/api/provisioning/route.ts":      { "maxDuration": 60 },
+    "app/api/checkout/route.ts":          { "maxDuration": 30 }
+  }
+}
