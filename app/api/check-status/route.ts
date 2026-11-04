@@ -13,24 +13,22 @@ export async function POST(req: NextRequest) {
     
     if (!order) return NextResponse.json({ error: 'Order tidak ditemukan' }, { status: 404 });
     
-    // Jika server sudah selesai dibuat
-    if (order.status === 'COMPLETED' && order.server) {
-       const user = await prisma.user.findUnique({ where: { email: order.customerEmail } });
-       // Kita tidak bisa mengambil password asli karena di-hash, 
-       // jadi kita gunakan password acak baru atau tampilkan pesan untuk reset.
-       // TAPI, karena kita baru saja membuatnya, kita bisa menangkap datanya dari log.
-       // SOLUSI TERBAIK: Kita modifikasi proses provisioning agar menyimpan password sementara.
-       
-       // --- UNTUK SEMENTARA KITA PAKAI INI DULU ---
-       // Karena password tidak tersimpan di DB, kita perlu mengubah provisioning
-       // (Lihat langkah 2 di bawah)
+    // Jika server sudah selesai dibuat, kirim datanya ke frontend
+    if (order.status === 'COMPLETED' && order.tempUsername) {
+       return NextResponse.json({ 
+         status: 'COMPLETED',
+         account: {
+           username: order.tempUsername,
+           password: order.tempPassword,
+           panelUrl: process.env.NEXT_PUBLIC_PTERO_PANEL_URL
+         }
+       });
     }
 
     if (order.status === 'PROVISIONING') {
        return NextResponse.json({ status: 'PROVISIONING' });
     }
 
-    // Cek ke Arthanshop
     if (!order.tripayRef) return NextResponse.json({ error: 'ID transaksi tidak ada' }, { status: 400 });
     
     const check = await arthan.checkStatus(order.tripayRef);
