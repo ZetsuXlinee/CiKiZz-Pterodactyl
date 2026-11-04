@@ -50,19 +50,31 @@ export async function POST(req: NextRequest) {
           expiresAt,
         },
       });
+      
+      // Simpan username & password sementara untuk ditampilkan di web
       await tx.order.update({
         where: { id: order.id },
-        data: { status: 'COMPLETED', processedAt: new Date() },
+        data: { 
+          status: 'COMPLETED', 
+          processedAt: new Date(),
+          tempUsername: username,
+          tempPassword: password
+        },
       });
     });
 
-    await sendCredentials(order.customerEmail, {
-      name: order.customerName,
-      username,
-      password,
-      panelUrl: process.env.PTERO_PANEL_URL!,
-      expiresAt,
-    });
+    // Kirim email (tetap dijalankan, kalau gagal tidak akan menggagalkan proses)
+    try {
+      await sendCredentials(order.customerEmail, {
+        name: order.customerName,
+        username,
+        password,
+        panelUrl: process.env.PTERO_PANEL_URL!,
+        expiresAt,
+      });
+    } catch (e) {
+      console.log("Email gagal dikirim, tapi data disimpan di web.");
+    }
 
     return NextResponse.json({ ok: true });
   } catch (err: any) {
