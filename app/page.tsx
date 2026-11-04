@@ -3,7 +3,7 @@ import { useState } from 'react';
 
 const plans = [
   { id: 'basic', name: 'Basic', price: 2500, desc: 'Cocok untuk bot ringan', features: ['1 Bulan Aktif', '1GB RAM', '5GB Disk'] },
-  { id: 'pro', name: 'Pro', price: 6500, desc: 'Paling laris untuk bot aktif', features: ['1 Bulan Aktif', '2GB RAM', '10GB Disk'], popular: true },
+  { id: 'pro', name: 'Pro', price: 6500, desc: 'Paling laris untuk bot aktif', features: ['q Bulan Aktif', '2GB RAM', '10GB Disk'], popular: true },
   { id: 'elite', name: 'Elite', price: 12000, desc: 'Untuk bot skala besar', features: ['1 Bulan Aktif', '4GB RAM', '20GB Disk'] },
 ];
 
@@ -11,6 +11,8 @@ export default function Home() {
   const [form, setForm] = useState({ name: '', email: '', phone: '' });
   const [loading, setLoading] = useState(false);
   const [qrData, setQrData] = useState<{img: string, total: number, ref: string} | null>(null);
+  // State baru untuk menampung data akun
+  const [accountData, setAccountData] = useState<{username: string, password: string, panelUrl: string} | null>(null);
 
   async function handleBuy(planId: string) {
     if (!form.name || !form.email || !form.phone) {
@@ -51,9 +53,12 @@ export default function Home() {
       });
       const data = await res.json();
       
-      if (data.status === 'PROVISIONING' || data.status === 'COMPLETED') {
-        alert('Pembayaran Berhasil! Server Anda sedang dibuat, silakan cek email secara berkala.');
+      if (data.status === 'COMPLETED' && data.account) {
+        // Jika selesai, tutup QRIS dan tampilkan akun
         setQrData(null);
+        setAccountData(data.account);
+      } else if (data.status === 'PROVISIONING') {
+        alert('Pembayaran Berhasil! Server Anda sedang dibuat (mohon tunggu 10-30 detik), lalu klik Cek Status lagi.');
       } else {
         alert('Pembayaran belum masuk. Silakan tunggu 1-2 menit lalu cek lagi.');
       }
@@ -144,7 +149,6 @@ export default function Home() {
             <div>
               <label className="block text-xs font-medium text-gray-400 mb-1">Alamat Email</label>
               <input className="w-full bg-black/50 border border-white/10 p-3 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="email@contoh.com" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-              <p className="text-[10px] text-yellow-500/80 mt-1">*Gunakan email aktif untuk menerima data akun.</p>
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-400 mb-1">No. WhatsApp</label>
@@ -166,22 +170,50 @@ export default function Home() {
           <div className="bg-white text-black p-6 rounded-2xl max-w-sm w-full text-center relative">
             <h3 className="text-xl font-bold mb-2">Scan untuk Membayar</h3>
             <p className="text-sm text-gray-600 mb-4">Total Tagihan: <b>Rp {qrData.total.toLocaleString('id-ID')}</b></p>
-            
             <div className="bg-gray-100 p-2 rounded-lg mb-4">
               <img src={qrData.img} alt="QRIS" className="w-full rounded" />
             </div>
-            
             <p className="text-xs text-gray-500 mb-6 font-mono bg-gray-100 py-1 rounded">Ref: {qrData.ref}</p>
-            
-            <button 
-              onClick={checkPaymentStatus}
-              disabled={loading}
-              className="w-full bg-green-600 hover:bg-green-500 text-white py-3 rounded-lg font-semibold mb-2 transition disabled:opacity-50"
-            >
+            <button onClick={checkPaymentStatus} disabled={loading} className="w-full bg-green-600 hover:bg-green-500 text-white py-3 rounded-lg font-semibold mb-2 transition disabled:opacity-50">
               {loading ? 'Mengecek...' : 'Saya Sudah Bayar (Cek Status)'}
             </button>
-            
             <button onClick={() => setQrData(null)} className="w-full bg-gray-200 hover:bg-gray-300 py-2 rounded-lg text-sm font-semibold text-gray-700 transition">
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL AKUN BERHASIL DIBUAT */}
+      {accountData && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-[#1a1a1a] border border-green-500/30 p-8 rounded-2xl max-w-sm w-full text-center relative shadow-[0_0_50px_-10px_rgba(34,197,94,0.3)]">
+            <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-2">Pembayaran Sukses!</h3>
+            <p className="text-sm text-gray-400 mb-6">Akun Pterodactyl Anda sudah aktif. Harap simpan data di bawah ini.</p>
+            
+            <div className="bg-black/50 p-4 rounded-xl text-left space-y-3 mb-6 border border-white/5">
+              <div>
+                <p className="text-xs text-gray-500">Username</p>
+                <p className="font-mono text-white text-lg font-bold">{accountData.username}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Password</p>
+                <p className="font-mono text-white text-lg font-bold">{accountData.password}</p>
+              </div>
+            </div>
+
+            <a 
+              href={accountData.panelUrl} 
+              target="_blank" 
+              className="block w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-lg font-semibold mb-3 transition"
+            >
+              Buka Panel Sekarang
+            </a>
+            
+            <button onClick={() => setAccountData(null)} className="text-sm text-gray-500 hover:text-white transition">
               Tutup
             </button>
           </div>
