@@ -2,7 +2,7 @@
 import { useState } from 'react';
 
 const plans = [
-  { id: 'basic', name: 'Basic', price: 2500, desc: 'Cocok untuk bot ringan', features: ['1 Bulan Aktif', '1GB RAM', '5GB Disk'] },
+  { id: 'basic', name: 'Basic', price: 1000, desc: 'Cocok untuk bot ringan', features: ['1 Bulan Aktif', '1GB RAM', '5GB Disk'] },
   { id: 'pro', name: 'Pro', price: 6500, desc: 'Paling laris untuk bot aktif', features: ['q Bulan Aktif', '2GB RAM', '10GB Disk'], popular: true },
   { id: 'elite', name: 'Elite', price: 12000, desc: 'Untuk bot skala besar', features: ['1 Bulan Aktif', '4GB RAM', '20GB Disk'] },
 ];
