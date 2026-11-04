@@ -14,7 +14,7 @@
     "bcryptjs": "^2.4.3",
     "next": "14.2.5",
     "next-auth": "^4.24.7",
-    "pterodactyl-api-wrapper": "^1.0.0",
+    "pterodactyl-api-wrapper": "^2.0.8",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "resend": "^3.4.0",
