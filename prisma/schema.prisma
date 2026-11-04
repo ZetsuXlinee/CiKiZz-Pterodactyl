@@ -55,6 +55,8 @@ model Order {
 
   @@index([customerEmail])
   @@index([status])
+  tempUsername  String? // <-- Tambahkan ini
+  tempPassword  String? // <-- Tambahkan ini
 }
 
 model Server {
